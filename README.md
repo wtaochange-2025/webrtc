@@ -34,8 +34,4 @@ STUN/TURN server for NAT traversal (Google's public STUN is pre-filled as a defa
 
 
 issue: webrtc pjsip dtmf not echo
-Summary of Solutions
-Scenario 	Goal	Action
-Want to hear tones	Hear tones in phone/browser	Set PJSIP endpoint dtmf_mode=inband.
-Need reliable detection	Reliable IVR entry (silent)	Set PJSIP endpoint dtmf_mode=rfc4733.
-Need both	Hear tones AND reliable IVR	Generate tones locally in PJSIP and send RFC 2833.
+
