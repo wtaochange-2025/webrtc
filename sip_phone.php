@@ -139,9 +139,20 @@ $config = [
     font-size: 2rem;
     letter-spacing: .08em;
     color: #fff;
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
     min-height: 48px;
-    word-break: break-all;
     line-height: 1.2;
+    caret-color: var(--accent);
+    padding: 0;
+  }
+  #dialDisplay::placeholder {
+    color: var(--muted);
+  }
+  #dialDisplay:focus {
+    border-bottom: 1px solid var(--accent);
   }
   #callerInfo {
     font-size: .8rem;
@@ -309,7 +320,7 @@ $config = [
   <!-- Display -->
   <div class="display">
     <div id="callTimer"></div>
-    <div id="dialDisplay">_</div>
+    <input id="dialDisplay" type="tel" placeholder="_" autocomplete="off" spellcheck="false" inputmode="numeric" />
     <div id="callerInfo"></div>
   </div>
 
@@ -471,7 +482,7 @@ function resetUI() {
   setStatus('Registered', 'registered');
   stopTimer();
   dialBuffer = '';
-  $display.textContent = '_';
+  $display.value = '';
   $caller.textContent = '';
   isMuted = false;
   isOnHold = false;
@@ -491,19 +502,22 @@ function pressKey(digit) {
     return;
   }
   dialBuffer += digit;
-  $display.textContent = dialBuffer || '_';
+  $display.value = dialBuffer;
 }
 
 function clearDisplay() {
   dialBuffer = '';
-  $display.textContent = '_';
+  $display.value = '';
 }
 
 document.addEventListener('keydown', e => {
-  if (/^[0-9*#]$/.test(e.key)) pressKey(e.key);
-  if (e.key === 'Backspace') {
+  const focused = document.activeElement === $display;
+  // When input is focused, let the browser handle digit/backspace naturally;
+  // only intercept Enter and Escape globally.
+  if (!focused && /^[0-9*#]$/.test(e.key)) pressKey(e.key);
+  if (!focused && e.key === 'Backspace') {
     dialBuffer = dialBuffer.slice(0, -1);
-    $display.textContent = dialBuffer || '_';
+    $display.value = dialBuffer;
   }
   if (e.key === 'Enter' && !currentSession) makeCall();
   if (e.key === 'Escape' && currentSession) hangup();
@@ -771,7 +785,24 @@ function sendDTMF() {
 /* ══════════════════════════════════════════════
    Boot
 ══════════════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', initSIP);
+window.addEventListener('DOMContentLoaded', function() {
+  // Sync dialBuffer whenever user types or pastes directly into the input
+  $display.addEventListener('input', function() {
+    // Strip anything that's not a valid dial character
+    var clean = $display.value.replace(/[^0-9+*#]/g, '');
+    $display.value = clean;
+    dialBuffer = clean;
+  });
+  // Allow paste via Ctrl+V / right-click even when input is focused
+  $display.addEventListener('paste', function(e) {
+    e.preventDefault();
+    var pasted = (e.clipboardData || window.clipboardData).getData('text');
+    var clean = pasted.replace(/[^0-9+*#]/g, '');
+    $display.value = clean;
+    dialBuffer = clean;
+  });
+  initSIP();
+});
 </script>
 </body>
 </html>
