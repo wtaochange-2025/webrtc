@@ -3,6 +3,13 @@ Claude.ai
 
 prompt: write php code for web sip call, use sip.js
 
+the following reference may not work, download sip.js on local path, then refer to it
+
+<<
+<!-- SIP.js from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sip.js/0.21.2/sip.min.js"></script>
+<<
+
 # webrtc
 
 Here's your fully-featured Web SIP Phone in a single PHP file. Here's a breakdown of what's included:
